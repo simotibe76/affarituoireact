@@ -1,0 +1,58 @@
+/* 📌 Stile per la schermata di gioco */
+.page-layout {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 20px;
+}
+
+/* 📌 Stile per i box delle regioni */
+.region-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 120px;
+    border: 2px solid white;
+    background: rgba(0, 0, 255, 0.3);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 10px;
+    transition: transform 0.3s ease;
+}
+
+/* 📌 Effetto quando il pacco viene aperto */
+.region-box.opened {
+    background: rgba(0, 255, 0, 0.5);
+    transform: scale(1.1);
+}
+
+/* 📌 Stile per le colonne premi */
+.low-values, .high-values {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 150px;
+}
+
+.prize-box {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 5px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.prize-box.blue {
+    background-color: blue;
+    color: white;
+}
+
+.prize-box.red {
+    background-color: red;
+    color: white;
+}
+

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=NPM
+Comment=
+Exec=sudo npm start
+Icon=google-webdesigner
+Path=/home/simint/affari-tuoi-web
+Terminal=true
+StartupNotify=true
