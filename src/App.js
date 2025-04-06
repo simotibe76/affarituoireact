@@ -3,7 +3,7 @@ import "./styles.css";  // Importa gli stili globali
 import StartScreen from "./components/StartScreen";
 import Carousel from "./components/Carousel";
 import GameBoard from "./components/GameBoard";
-
+import "./styles.css";
 const App = () => {
   const [selectedRegion, setSelectedRegion] = useState(null);
   const [selectedBox, setSelectedBox] = useState(null);

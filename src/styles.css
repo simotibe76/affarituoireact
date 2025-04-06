@@ -3,7 +3,7 @@
   text-align: center;
   font-family: Arial, sans-serif;
   padding: 20px;
-background-color: #041633;
+  background-color: #041633;
 }
 
 /* Layout della schermata di gioco */
@@ -18,21 +18,23 @@ background-color: #041633;
 .prizes-board {
   width: 200px;
   text-align: center;
- 
 }
+
 .prizes-board h3 {
   margin-bottom: 10px;
 }
+
 .prizes-board ul {
   list-style: none;
   padding: 0;
 }
+
 .prizes-board ul li {
   padding: 8px;
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 5px;
- border-radius: 10px;
+  border-radius: 10px;
 }
 
 /* Premi bassi (colonna sinistra, sfondo blu) */
@@ -70,18 +72,26 @@ background-color: #041633;
   cursor: pointer;
   transition: transform 0.5s ease;
 }
+
 .region-box p {
   margin: 0;
   font-size: 16px;
   text-align: center;
 }
+
 .region-box.opened {
   background-color: green;
   transform: scale(1.1);
 }
+
 .region-box.opened p {
   font-size: 20px;
   font-weight: bold;
+}
+
+/* Effetto hover sui pacchi */
+.region-box:hover {
+  box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.7);
 }
 
 /* Stile per il pacco del giocatore */
@@ -89,6 +99,7 @@ background-color: #041633;
   text-align: center;
   margin-top: 20px;
 }
+
 .your-box .box {
   width: 100px;
   height: 100px;
@@ -99,5 +110,120 @@ background-color: #041633;
   font-weight: bold;
   line-height: 100px;
   margin: 0 auto;
+}
+
+/* Overlay della chiamata */
+.doctor-call-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.9) !important; /* Forza l'opacità */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Assicura che il popup sia sempre sopra */
+}
+
+/* Finestra della chiamata */
+.doctor-call-box {
+  background: linear-gradient(135deg, #ffffff, #e0e0e0);
+  padding: 25px;
+  width: 360px;
+  max-width: 90%;
+  border-radius: 20px;
+  text-align: center;
+  color: black;
+  font-size: 18px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  animation: scaleIn 0.4s ease-in-out;
+  border: 3px solid #0078d7;
+  position: relative;
+}
+
+/* Bordo fumetto per la finestra della chiamata */
+.doctor-call-box::after {
+  content: "";
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 15px solid #ffffff;
+}
+
+/* Testo della chiamata */
+.doctor-call-header {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Avatar del Dottore */
+.doctor-avatar img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #0078d7;
+  padding: 5px;
+  margin-bottom: 15px;
+}
+
+/* Animazione di entrata */
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Pulsanti chiamata */
+.call-buttons {
+  margin-top: 20px;
+}
+
+.call-buttons button {
+  font-size: 18px;
+  padding: 12px 20px;
+  margin: 10px;
+  cursor: pointer;
+  border-radius: 50px;
+  width: 140px;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+/* Effetto hover sui pulsanti */
+.call-buttons .accept:hover,
+.call-buttons .decline:hover {
+  transform: scale(1.1);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Pulsante Accetta (verde) */
+.call-buttons .accept {
+  background: #28a745;
+  color: white;
+}
+
+.call-buttons .decline {
+  background: #dc3545;
+  color: white;
+}
+
+.call-buttons .accept:hover {
+  background: #218838;
+}
+
+.call-buttons .decline:hover {
+  background: #c82333;
 }
 
