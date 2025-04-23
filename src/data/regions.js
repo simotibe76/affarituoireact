@@ -1,5 +1,4 @@
-// /src/data/regions.js
-const regions = [
+const regionsList = [
   { name: "Abruzzo" },
   { name: "Basilicata" },
   { name: "Calabria" },
@@ -22,5 +21,5 @@ const regions = [
   { name: "Veneto" }
 ];
 
-export default regions;
+export default regionsList;
 

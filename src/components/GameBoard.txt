@@ -1,0 +1,387 @@
+import React, { useState, useEffect } from "react";
+import { 
+  offerTipo1, 
+  offerTipo2CambioPacco, 
+  offerTipo3Scelta,
+  calculateDoctorOffer 
+
+} from "../utils/calculateDoctorOffer";
+import calculateDoctorOfferAI from "../utils/CalculateDoctorOfferAI";
+
+
+const GameBoard = ({ selectedRegion, assignedBoxNumber, regionMapping, gameMode }) => {
+  // Stato locale per la mappa delle regioni (assegnazioni dei pacchi)
+  const [localMapping, setLocalMapping] = useState(regionMapping);
+  // Stato per i pacchi aperti manualmente
+  const [openedBoxes, setOpenedBoxes] = useState([]);
+  // Stato per visualizzare l'overlay della chiamata del Dottore
+  const [showDoctorCall, setShowDoctorCall] = useState(false);
+  // Stato per visualizzare l'overlay dell'offerta del Dottore
+  const [showDoctorOffer, setShowDoctorOffer] = useState(false);
+  // Stato per memorizzare l'offerta attuale
+  const [currentOffer, setCurrentOffer] = useState(null);
+  // Stato per la fine del gioco
+  const [gameEnd, setGameEnd] = useState(false);
+  // Stato per il pacco posseduto dal giocatore
+  const [currentPlayerBox, setCurrentPlayerBox] = useState(assignedBoxNumber);
+  // Stato per l'overlay di swap (usato in "CambioPacco" e "SceltaTripla")
+  const [showTripleSwap, setShowTripleSwap] = useState(false);
+const [fadingBoxes, setFadingBoxes] = useState([]);
+const [isOpeningBox, setIsOpeningBox] = useState(false);
+const [offerAccepted, setOfferAccepted] = useState(false);
+const handleOfferAccepted = () => {
+  console.log("Offerta accettata:", currentOffer.monetaryOffer);
+  setOfferAccepted(true);
+  setShowDoctorOffer(false);
+  // Nota: NON chiamiamo setGameEnd(true) qui per permettere al giocatore di aprire ancora i pacchi
+};
+  // Debug: log dello stato dell'overlay offerta
+  useEffect(() => {
+    console.log("showDoctorOffer aggiornato:", showDoctorOffer);
+  }, [showDoctorOffer]);
+
+  // Debug: log dello stato dell'overlay di swap
+  useEffect(() => {
+    console.log("⚡ Stato showTripleSwap aggiornato:", showTripleSwap);
+  }, [showTripleSwap]);
+
+  // Funzione per ottenere l'icona della modalità di gioco
+  const getGameModeIcon = (mode) => {
+    if (mode === "random") return "🎲";
+    if (mode === "ai") return "🧠";
+    return "";
+  };
+
+  // Trova il valore (premio) del pacco del giocatore
+  const playerBoxValue =
+    localMapping.find((region) => region.number === currentPlayerBox)?.prize || 0;
+
+  // Gestione apertura pacchi
+const handleOpenBox = (region) => {
+  if (!openedBoxes.includes(region.number) && !isOpeningBox) {
+    setIsOpeningBox(true); // Blocca temporaneamente altri click
+
+    const newOpenedBoxes = [...openedBoxes, region.number];
+    setOpenedBoxes(newOpenedBoxes);
+
+    // Avvia il fade-out dopo 2 secondi
+    setTimeout(() => {
+      setFadingBoxes((prevFading) => [...prevFading, region.number]);
+      setIsOpeningBox(false); // Riabilita i click dopo l'animazione
+    }, 2000);
+
+    console.log("📦 Pacco aperto:", region.number);
+
+    // Attiva la chiamata del Dottore solo se l'offerta NON è stata accettata
+    if (
+      !offerAccepted &&
+      (newOpenedBoxes.length === 6 ||
+       (newOpenedBoxes.length > 6 && ((newOpenedBoxes.length - 6) % 3 === 0)))
+    ) {
+      console.log("📞 Il Dottore sta chiamando!");
+      setShowDoctorCall(true);
+    }
+
+    // Se non è stata accettata un'offerta e questo è l'ultimo pacco, termina il gioco
+    if (!offerAccepted && newOpenedBoxes.length === localMapping.length - 1) {
+      setTimeout(() => {
+        setGameEnd(true);
+      }, 2500);
+    }
+  }
+};
+
+
+
+
+
+  // Gestione della risposta alla chiamata del Dottore
+  const handleDoctorResponse = (accepted) => {
+    setShowDoctorCall(false);
+    if (accepted) {
+      const unopened = localMapping.filter(
+        (region) => !openedBoxes.includes(region.number)
+      );
+      let offer;
+      if (gameMode === "random") {
+        // Genera un numero casuale tra 0 e 2 per scegliere il tipo di offerta
+        const randomIndex = Math.floor(Math.random() * 3);
+        switch (randomIndex) {
+          case 0:
+            // Tipo 1: offerta monetaria
+            console.log("offerta tipo1");
+            const monetaryOffer = offerTipo1(unopened);
+            offer = {
+              type: "Tipo1",
+              message: `Il Dottore ti offre ${monetaryOffer}€ in denaro.`,
+              monetaryOffer,
+            };
+            break;
+          case 1:
+            // Tipo 2: cambio pacco
+            console.log("offerta tipo2");
+            offer = offerTipo2CambioPacco(localMapping, currentPlayerBox);
+            break;
+          case 2:
+            // Tipo 3: scelta tripla
+            console.log("offerta tipo3");
+            offer = offerTipo3Scelta(unopened, localMapping, currentPlayerBox);
+            break;
+          default:
+            offer = { type: "Unknown", message: "Nessuna offerta generata." };
+        }
+      } else {
+        // Se non è random, usiamo la funzione standard (attualmente restituisce Tipo3)
+        offer = gameMode === "AI" 
+  ? calculateDoctorOfferAI(unopened, localMapping, currentPlayerBox) 
+  : calculateDoctorOffer(unopened, localMapping, currentPlayerBox);
+console.log("Modalità attuale di gioco:", gameMode);
+      }
+      console.log("🔎 Offerta generata:", offer);
+      setCurrentOffer(offer);
+      // Mostra l'overlay dell'offerta
+      setShowDoctorOffer(true);
+    }
+  };
+
+  // Gestione delle opzioni per il Tipo3 (Scelta Tripla)
+  const handleTripleAccept = () => {
+    console.log("Offerta monetaria accettata:", currentOffer.monetaryOffer);
+    setShowDoctorOffer(false);
+    setGameEnd(true);
+  };
+
+  const handleTripleReject = () => {
+    console.log("Offerta rifiutata; il gioco continua.");
+    setShowDoctorOffer(false);
+  };
+
+  // Funzione per attivare il cambio pacco (swap) in SceltaTripla
+  const handleTripleSwap = () => {
+    console.log("🔄 Cambio Pacco selezionato in SceltaTripla!");
+    setShowTripleSwap(true);
+    setShowDoctorOffer(false);
+  };
+
+  // Gestione della selezione di una nuova regione durante lo swap
+  const handleRegionSelection = (newRegionNumber) => {
+    const oldPlayerBox = currentPlayerBox;
+    const newPlayerBox = newRegionNumber;
+    // Aggiorna la mappa locale scambiando i pacchi
+    setLocalMapping((prevMapping) =>
+      prevMapping.map((region) => {
+        if (region.name === selectedRegion) {
+          return { ...region, number: newPlayerBox };
+        }
+        if (region.number === newPlayerBox && region.name !== selectedRegion) {
+          return { ...region, number: oldPlayerBox };
+        }
+        return region;
+      })
+    );
+    setCurrentPlayerBox(newPlayerBox);
+    console.log(
+      "Swap effettuato: il pacco del giocatore è passato da",
+      oldPlayerBox,
+      "a",
+      newPlayerBox
+    );
+    setShowDoctorOffer(false);
+    setShowTripleSwap(false);
+  };
+
+  return (
+    <div className="app">
+      <h1>
+        🎲 Affari Tuoi - {selectedRegion} Edition 🎲{" "}
+        <span style={{ marginLeft: "10px" }}>{getGameModeIcon(gameMode)}</span>
+      </h1>
+     <h2>Il tuo pacco: Pacco N° {currentPlayerBox}</h2>
+{offerAccepted && currentOffer && !gameEnd && (
+  <div className="offer-accepted-message" style={{ marginBottom: "20px" }}>
+    <p style={{ color: "red", fontSize: "20px", fontWeight: "bold" }}>
+      Gioco terminato! Hai accettato: {currentOffer.monetaryOffer}€
+    </p>
+  </div>
+)}
+
+      <div className="page-layout">
+        {/* Colonna dei premi bassi (10 premi bassi ordinati) */}
+        <div className="prizes-board low-values">
+          <h3>💙 Premi bassi</h3>
+          <ul>
+            {localMapping
+              .filter(
+                (region) =>
+                  region.prize < 5000 &&
+                  !openedBoxes.includes(region.number)
+              )
+              .sort((a, b) => a.prize - b.prize)
+              .slice(0, 10)
+              .map((region) => (
+                <li key={region.number}>{region.prize}€</li>
+              ))}
+          </ul>
+        </div>
+
+        {/* Griglia centrale dei pacchi */}
+<div className="region-grid">
+  {localMapping
+    .filter((region) => region.number !== currentPlayerBox && !fadingBoxes.includes(region.number))
+    .map((region) => (
+      <div
+        key={region.number}
+        className={`region-box ${openedBoxes.includes(region.number) ? "opened fade-out" : ""}`}
+        onClick={isOpeningBox ? null : () => handleOpenBox(region)} // 🔥 Disabilita i click temporaneamente
+      >
+        {!openedBoxes.includes(region.number) ? (
+          <>
+            <p>{region.name}</p>
+            <p>N° {region.number}</p>
+          </>
+        ) : (
+          <p className="prize-value">💰 {region.prize}€</p>
+        )}
+      </div>
+    ))}
+</div>
+
+
+
+        {/* Colonna dei premi alti (10 premi alti ordinati) */}
+        <div className="prizes-board high-values">
+          <h3>❤️ Premi alti</h3>
+          <ul>
+            {localMapping
+              .filter(
+                (region) =>
+                  region.prize >= 5000 &&
+                  !openedBoxes.includes(region.number)
+              )
+              .sort((a, b) => a.prize - b.prize)
+              .slice(0, 10)
+              .map((region) => (
+                <li key={region.number}>{region.prize}€</li>
+              ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* Overlay: Chiamata del Dottore */}
+      {showDoctorCall && !showDoctorOffer && !gameEnd && (
+        <div className="doctor-call-overlay">
+          <div className="doctor-call-box">
+            <h2>📞 Il Dottore ti sta chiamando!</h2>
+            <button onClick={() => handleDoctorResponse(true)}>✅ Accetta</button>
+            <button onClick={() => handleDoctorResponse(false)}>❌ Rifiuta</button>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay: Offerta del Dottore */}
+{showDoctorOffer && !gameEnd && currentOffer && (
+  <div className="doctor-offer-overlay">
+    <div className="doctor-offer-box">
+      <h2>💰 Offerta del Dottore!</h2>
+      <p>{currentOffer.message}</p>
+
+      {/* Debug: Mostra il tipo di offerta */}
+      <p style={{ fontSize: "12px", color: "red" }}>
+        [Tipo offerta: "{currentOffer.type}"]
+      </p>
+
+      {currentOffer.type.trim() === "Tipo1" ? (
+        <div className="single-option">
+          <button onClick={handleOfferAccepted}>
+            ✅ Accetta {currentOffer.monetaryOffer}€ e termina
+          </button>
+          <button onClick={() => setShowDoctorOffer(false)}>
+            ❌ Rifiuta e continua
+          </button>
+        </div>
+      ) : currentOffer.type.trim() === "CambioPacco" ? (
+        /* Tipo2 rimane invariato */
+        <div className="single-option">
+          <button onClick={() => setShowTripleSwap(true)}>
+            🔄 Accetta e scegli un nuovo pacco
+          </button>
+          <button onClick={() => setShowDoctorOffer(false)}>
+            ❌ Rifiuta e continua
+          </button>
+        </div>
+      ) : currentOffer.type.trim() === "SceltaTripla" ? (
+        <div className="triple-options">
+          <button onClick={handleOfferAccepted}>
+            ✅ Accetta {currentOffer.monetaryOffer}€
+          </button>
+          <button onClick={() => {
+            console.log("🟡 TEST: Pulsante 'Cambia Pacco' è stato cliccato!");
+            setShowTripleSwap(true);
+          }}>
+            🔄 Cambia Pacco
+          </button>
+          <button onClick={handleTripleReject}>
+            ❌ Rifiuta e Prosegui
+          </button>
+        </div>
+      ) : (
+        <button onClick={() => setShowDoctorOffer(false)}>▶ Continua</button>
+      )}
+    </div>
+  </div>
+)}
+
+
+      {/* Overlay per il cambio pacco */}
+      {showTripleSwap && currentOffer && 
+        (currentOffer.type.trim() === "CambioPacco" || currentOffer.type.trim() === "SceltaTripla") && (
+        <div className="doctor-offer-overlay">
+          <div className="doctor-offer-box">
+            <h2>🔄 Cambio Pacco</h2>
+            <p>Scegli il pacco con cui vuoi fare lo swap:</p>
+
+            {/* Debug: mostra lo stato del cambio pacco */}
+            <p style={{ fontSize: "12px", color: "red" }}>
+              [showTripleSwap: "{showTripleSwap}"]
+            </p>
+
+            <div className="swap-options">
+              {currentOffer.availableRegions
+                .filter((region) => !openedBoxes.includes(region.number))
+                .map((region) => (
+                  <button
+                    key={region.number}
+                    onClick={() => handleRegionSelection(region.number)}
+                  >
+                    {region.name} (N° {region.number})
+                  </button>
+                ))}
+            </div>
+            <button onClick={() => setShowTripleSwap(false)}>❌ Indietro</button>
+          </div>
+        </div>
+      )}
+
+      {/* Overlay: Fine del Gioco */}
+{/* Overlay: Fine del Gioco */}
+{gameEnd && (
+  <div className="game-end-overlay">
+    <div className="game-end-box">
+      <h2>🎉 Fine del gioco!</h2>
+      <p>
+        Hai vinto: <strong>{playerBoxValue}€</strong>
+      </p>
+      <button onClick={() => window.location.reload()}>
+        🔄 Rigioca
+      </button>
+    </div>
+  </div>
+)}
+
+
+    </div>
+  );
+};
+
+
+export default GameBoard;

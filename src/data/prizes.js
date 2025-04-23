@@ -1,20 +1,15 @@
-// /src/data/prizes.js
-export const prizeValues = [
+const prizeValues = [
   0, 5000, 1, 10000, 5, 15000, 10, 20000, 20, 30000,
   50, 50000, 75, 75000, 100, 100000, 200, 200000, 500, 300000
 ];
 
-export function getShuffledPrizes() {
-  const prizes = prizeValues.map((value, index) => ({
-    id: index + 1,
-    value
-  }));
+// Aggiungi questo named export
+export const prizes = prizeValues;
 
-  for (let i = prizes.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [prizes[i], prizes[j]] = [prizes[j], prizes[i]];
-  }
+export const getShuffledPrizes = () => {
+  const shuffled = [...prizeValues].sort(() => Math.random() - 0.5);
+  return shuffled.map((value, index) => ({ id: index + 1, value }));
+};
 
-  return prizes;
-}
+export default prizeValues;
 
